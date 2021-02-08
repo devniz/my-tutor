@@ -1,4 +1,4 @@
-package com.mytutor.bookshop.app;
+package com.mytutor.bookshop;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
