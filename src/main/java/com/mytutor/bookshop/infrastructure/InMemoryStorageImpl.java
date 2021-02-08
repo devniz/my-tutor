@@ -118,9 +118,10 @@ public class InMemoryStorageImpl implements InMemoryStorage {
 
     @Override
     public void cashOut(BigDecimal restockPrice) {
+        var currentBudget = this.getBudget();
         var pricePerBook = restockPrice.multiply(_SUPPLIER_RATE_).setScale(2, RoundingMode.CEILING);
         var totalOrder = pricePerBook.multiply(new BigDecimal("10.00").setScale(2, RoundingMode.CEILING));
-        this.setBudget(getBudget().subtract(totalOrder).setScale(2, RoundingMode.CEILING));
+        this.setBudget(currentBudget.subtract(totalOrder).setScale(2, RoundingMode.CEILING));
     }
 
 

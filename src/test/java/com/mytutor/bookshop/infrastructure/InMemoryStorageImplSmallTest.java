@@ -65,6 +65,28 @@ class InMemoryStorageImplSmallTest {
         }
     }
 
+    @Test
+    @DisplayName("Verify cash out logic")
+    void itShouldUpdateBudgetWhenRestock() {
+        InMemoryStorageImpl storage = new InMemoryStorageImpl();
+
+        storage.createNewStore(new BigDecimal("500.00"));
+        storage.cashOut(new BigDecimal("25.00"));
+
+        assertEquals(new BigDecimal("325.00"), storage.getBudget());
+    }
+
+    @Test
+    @DisplayName("Verify cash in logic")
+    void itShouldUpdateBudgetWhenSaleOccur() {
+        InMemoryStorageImpl storage = new InMemoryStorageImpl();
+
+        storage.createNewStore(new BigDecimal("500.00"));
+        storage.cashIn(2, new BigDecimal("30.00"));
+
+        assertEquals(new BigDecimal("560.00"), storage.getBudget());
+    }
+
     private HashMap<String, Book> createNewStore() {
         return new HashMap<>() {
             {
