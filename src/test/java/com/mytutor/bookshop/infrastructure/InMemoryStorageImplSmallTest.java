@@ -50,7 +50,7 @@ class InMemoryStorageImplSmallTest {
 
     @Test
     @DisplayName("Verify restock logic")
-    void itShouldRestockIfQuantityIsLessThanThreeItems() {
+    void itShouldRestockIfQuantityIsLessThanThreeItemsAndUpdateInitialBudget() {
         InMemoryStorageImpl storage = new InMemoryStorageImpl();
 
         storage.createNewStore(new BigDecimal("500.00"));
@@ -61,6 +61,7 @@ class InMemoryStorageImplSmallTest {
         } catch (OutOfStockException ex) {
             var currentStore = storage.getCurrentStore();
             assertEquals(12, currentStore.get("D").getQuantity());
+            assertEquals(new BigDecimal("530.00"), storage.getBudget());
         }
     }
 

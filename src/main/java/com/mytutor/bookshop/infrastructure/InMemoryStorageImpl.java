@@ -3,8 +3,10 @@ package com.mytutor.bookshop.infrastructure;
 import com.mytutor.bookshop.domain.Book;
 import com.mytutor.bookshop.infrastructure.exception.OutOfStockException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -12,16 +14,18 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 @Slf4j
+@Component
 public class InMemoryStorageImpl implements InMemoryStorage {
 
     private static final Integer _MIN_STOCK_ = 3;
+    private static final BigDecimal _SUPPLIER_RATE_ = new BigDecimal("0.7");
 
-    BigDecimal initialBudget;
+    BigDecimal budget;
     Map<String, Book> store;
 
     @Override
     public void createNewStore(BigDecimal budget) {
-        this.initialBudget = budget;
+        this.setBudget(budget);
         Map<String, Book> store = new HashMap<>() {
             {
                 put("A", new Book(new BigDecimal("25.00"), 10));
@@ -43,6 +47,11 @@ public class InMemoryStorageImpl implements InMemoryStorage {
                 .map(q -> q.get(bookType).getQuantity())
                 .findFirst();
 
+        Optional<BigDecimal> bookToOrderPrice = streamSupplier
+                .get()
+                .map(p -> p.get(bookType).getPrice())
+                .findFirst();
+
         if (bookToOrderQuantity.isPresent() && bookToOrderQuantity.get() >= quantity) {
             var orderedBookPrice = streamSupplier
                     .get()
@@ -58,6 +67,8 @@ public class InMemoryStorageImpl implements InMemoryStorage {
                     .findFirst()
                     .get()
                     .getQuantity();
+
+            this.cashIn(quantity, bookToOrderPrice.get());
 
             this.store.put(bookType, new Book(
                     new BigDecimal(String.valueOf(orderedBookPrice)),
@@ -88,12 +99,30 @@ public class InMemoryStorageImpl implements InMemoryStorage {
                     .findFirst()
                     .get()
                     .getQuantity();
+
+            this.cashOut(bookToRestockPrice);
+
             this.store.put(bookType, new Book(
                     new BigDecimal(String.valueOf(bookToRestockPrice)),
                     bookToRestockNewQuantity
             ));
         }
     }
+
+    @Override
+    public void cashIn(Integer quantity, BigDecimal price) {
+        var currentBudget = this.getBudget();
+        var profit = price.multiply(new BigDecimal(quantity));
+        this.setBudget(currentBudget.add(profit));
+    }
+
+    @Override
+    public void cashOut(BigDecimal restockPrice) {
+        var pricePerBook = restockPrice.multiply(_SUPPLIER_RATE_).setScale(2, RoundingMode.CEILING);
+        var totalOrder = pricePerBook.multiply(new BigDecimal("10.00").setScale(2, RoundingMode.CEILING));
+        this.setBudget(getBudget().subtract(totalOrder).setScale(2, RoundingMode.CEILING));
+    }
+
 
     @Override
     public void setCurrentStore(Map<String, Book> store) {
@@ -103,5 +132,15 @@ public class InMemoryStorageImpl implements InMemoryStorage {
     @Override
     public Map<String, Book> getCurrentStore() {
         return this.store;
+    }
+
+    @Override
+    public void setBudget(BigDecimal budget) {
+        this.budget = budget;
+    }
+
+    @Override
+    public BigDecimal getBudget() {
+        return this.budget;
     }
 }

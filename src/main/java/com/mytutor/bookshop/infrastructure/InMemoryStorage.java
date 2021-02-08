@@ -11,10 +11,17 @@ public interface InMemoryStorage {
 
     void updateBookStock(String bookType, Integer quantity);
 
-
     void restock(String bookType, Integer quantity);
 
+    void cashIn(Integer quantity, BigDecimal price);
+
+    void cashOut(BigDecimal restockPrice);
+
     void setCurrentStore(Map<String, Book> store);
+
+    void setBudget(BigDecimal budget);
+
+    BigDecimal getBudget();
 
     Map<String, Book> getCurrentStore();
 
