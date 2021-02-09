@@ -1,0 +1,65 @@
+{
+	"info": {
+		"_postman_id": "639909b6-6053-41ba-bb20-b1b3ba3e7f9c",
+		"name": "my-tutor",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "http://localhost:8080/api/v1/shop/report",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/v1/shop/report",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"shop",
+						"report"
+					]
+				},
+				"description": "Generate a Shop report."
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:8080/api/v1/shop/order?bookType=A&quantity=4",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/v1/shop/order?bookType=A&quantity=4",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"shop",
+						"order"
+					],
+					"query": [
+						{
+							"key": "bookType",
+							"value": "A"
+						},
+						{
+							"key": "quantity",
+							"value": "4"
+						}
+					]
+				},
+				"description": "Order books given valid book type and quantity."
+			},
+			"response": []
+		}
+	]
+}

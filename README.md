@@ -26,7 +26,7 @@ From there, I looked back into optimistic/pessimistic locking, Java synchronized
 
 #### Method 1) Use Postman:
 
-- Simply import the collection file `my-tutor.postman_collection.json` into Postman.
+- Simply import the collection file `src/main/resources/static/my-tutor.postman_collection.json` into Postman.
 
 #### Method 2) CURL request:
 
