@@ -3,13 +3,14 @@ package com.mytutor.bookshop.infrastructure;
 import com.mytutor.bookshop.domain.Book;
 import com.mytutor.bookshop.infrastructure.exception.OutOfStockException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -19,14 +20,20 @@ public class InMemoryStorageImpl implements InMemoryStorage {
 
     private static final Integer _MIN_STOCK_ = 3;
     private static final BigDecimal _SUPPLIER_RATE_ = new BigDecimal("0.7");
+    private final ReportImpl report;
+
+    @Autowired
+    public InMemoryStorageImpl(ReportImpl report) {
+        this.report = report;
+    }
 
     BigDecimal budget;
-    Map<String, Book> store;
+    ConcurrentMap<String, Book> store;
 
     @Override
     public void createNewStore(BigDecimal budget) {
         this.setBudget(budget);
-        Map<String, Book> store = new HashMap<>() {
+        ConcurrentMap<String, Book> store = new ConcurrentHashMap<>() {
             {
                 put("A", new Book(new BigDecimal("25.00"), 10));
                 put("B", new Book(new BigDecimal("20.00"), 10));
@@ -39,8 +46,8 @@ public class InMemoryStorageImpl implements InMemoryStorage {
     }
 
     @Override
-    public void updateBookStock(String bookType, Integer quantity) {
-        Supplier<Stream<Map<String, Book>>> streamSupplier = () -> Stream.of(this.store);
+    synchronized public void updateBookStock(String bookType, Integer quantity) {
+        Supplier<Stream<ConcurrentMap<String, Book>>> streamSupplier = () -> Stream.of(this.store);
 
         Optional<Integer> bookToOrderQuantity = streamSupplier
                 .get()
@@ -74,6 +81,10 @@ public class InMemoryStorageImpl implements InMemoryStorage {
                     new BigDecimal(String.valueOf(orderedBookPrice)),
                     orderedBookNewQuantity
             ));
+
+            this.report.updateTotalSales(bookType);
+            this.report.calculateTotalProfit(bookType);
+
         } else {
             this.restock(bookType, bookToOrderQuantity.get());
             throw new OutOfStockException("Book " + bookType + " is out of stock.");
@@ -83,7 +94,7 @@ public class InMemoryStorageImpl implements InMemoryStorage {
     @Override
     public void restock(String bookType, Integer quantity) {
         if (quantity < _MIN_STOCK_) {
-            Supplier<Stream<Map<String, Book>>> streamSupplier = () -> Stream.of(this.store);
+            Supplier<Stream<ConcurrentMap<String, Book>>> streamSupplier = () -> Stream.of(this.store);
 
             var bookToRestockPrice = streamSupplier
                     .get()
@@ -124,14 +135,13 @@ public class InMemoryStorageImpl implements InMemoryStorage {
         this.setBudget(currentBudget.subtract(totalOrder).setScale(2, RoundingMode.CEILING));
     }
 
-
     @Override
-    public void setCurrentStore(Map<String, Book> store) {
+    public void setCurrentStore(ConcurrentMap<String, Book> store) {
         this.store = store;
     }
 
     @Override
-    public Map<String, Book> getCurrentStore() {
+    public ConcurrentMap<String, Book> getCurrentStore() {
         return this.store;
     }
 

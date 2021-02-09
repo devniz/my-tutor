@@ -3,7 +3,7 @@ package com.mytutor.bookshop.infrastructure;
 import com.mytutor.bookshop.domain.Book;
 
 import java.math.BigDecimal;
-import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
 
 public interface InMemoryStorage {
 
@@ -17,12 +17,12 @@ public interface InMemoryStorage {
 
     void cashOut(BigDecimal restockPrice);
 
-    void setCurrentStore(Map<String, Book> store);
+    void setCurrentStore(ConcurrentMap<String, Book> store);
 
     void setBudget(BigDecimal budget);
 
     BigDecimal getBudget();
 
-    Map<String, Book> getCurrentStore();
+    ConcurrentMap<String, Book> getCurrentStore();
 
 }
