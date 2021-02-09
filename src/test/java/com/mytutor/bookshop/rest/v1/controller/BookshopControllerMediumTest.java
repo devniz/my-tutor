@@ -7,6 +7,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
 
 class BookshopControllerMediumTest {
 
@@ -27,11 +28,12 @@ class BookshopControllerMediumTest {
                 .basePath("/api/v1/shop")
                 .post("/order")
                 .then().log().all()
+                .body(equalTo("Thank you for your purchase!"))
                 .assertThat().statusCode(200);
     }
 
     @Test
-    @DisplayName("/POST to order endpoint with failure")
+    @DisplayName("/POST to order endpoint with failure 1")
     void itShouldReturnHttpNotAcceptableIfQuantityIsBiggerThanStock() {
         given().log().all()
                 .when()
@@ -41,6 +43,29 @@ class BookshopControllerMediumTest {
                 .post("/order")
                 .then()
                 .assertThat().statusCode(406);
+    }
+
+    @Test
+    @DisplayName("/POST to order endpoint with failure 2")
+    void itShouldReturnOutOfStockError() {
+        given().log().all()
+                .when()
+                .param("bookType", "E")
+                .param("quantity", 10)
+                .basePath("/api/v1/shop")
+                .post("/order")
+                .then()
+                .body(equalTo("Thank you for your purchase!"))
+                .assertThat().statusCode(200);
+        given().log().all()
+                .when()
+                .param("bookType", "E")
+                .param("quantity", 1)
+                .basePath("/api/v1/shop")
+                .post("/order")
+                .then()
+                .body(equalTo("Sorry, we are out of stock."))
+                .assertThat().statusCode(200);
     }
 
     @Test

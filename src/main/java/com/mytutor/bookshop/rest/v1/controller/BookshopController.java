@@ -25,7 +25,7 @@ public class BookshopController {
     }
 
     @PostMapping(path = "/order")
-    public ResponseEntity<Boolean> orderBook(@RequestParam String bookType, @RequestParam Integer quantity) {
+    public ResponseEntity<String> orderBook(@RequestParam String bookType, @RequestParam Integer quantity) {
         if (!bookType.isEmpty() && (quantity > 0 && quantity <= 10)) {
             return new ResponseEntity<>(this.service.orderBook(bookType, quantity), HttpStatus.OK);
         }

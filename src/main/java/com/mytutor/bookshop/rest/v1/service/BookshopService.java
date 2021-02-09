@@ -22,7 +22,7 @@ public class BookshopService {
         this.storage = BookshopApplication.getStorage();
     }
 
-    public Boolean orderBook(String bookType, Integer quantity) {
+    public String orderBook(String bookType, Integer quantity) {
         if (quantity > 10) {
             throw new QuantityExceedsStockException("the maximum quantity you can order is 10.");
         }
@@ -30,12 +30,12 @@ public class BookshopService {
         if (validateBookType(bookType)) {
             try {
                 this.storage.updateBookStock(bookType.toUpperCase(), quantity);
-                return true;
             } catch (Exception ex) {
                 log.error(ex.getMessage());
+                return "Sorry, we are out of stock.";
             }
         }
-        return false;
+        return "Thank you for your purchase!";
     }
 
     public String getReport() {
