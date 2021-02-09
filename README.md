@@ -46,7 +46,7 @@ If I had more time, and the requirement to make it work for real customers, I wi
 
 - Use a NoSQL or real DB instead of in-memory HashMap storage.
 - Not use a blocking synchronized to make sure that the store data are consistent. (synchronized is blocking the thread until it is finished).
-- Use CompletableFuture or Akka Actor-model to have a thread-safe store.
+- Use CompletableFuture or Akka Actor-model to have a non-blocking & thread-safe store.
 - Build a UI with React to make it user-friendly.
 
 ### Contact
