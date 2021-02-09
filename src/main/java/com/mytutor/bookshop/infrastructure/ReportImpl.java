@@ -28,11 +28,11 @@ public class ReportImpl implements Report {
     }
 
     @Override
-    synchronized public void updateTotalSales(String bookType) {
-        var currentTotalSales = this.getTotalSales(bookType);
+    synchronized public void updateTotalSales(String bookType, Integer quantity) {
+        var currentTotalSales = this.getSales(bookType);
         var currentBookPrice = this.getBookPrice(bookType);
-        var newTotalSales = currentTotalSales + 1;
-        this.setTotalSales(bookType, newTotalSales, currentBookPrice);
+        var newTotalSales = Integer.sum(currentTotalSales, quantity);
+        this.setSales(bookType, newTotalSales, currentBookPrice);
     }
 
     @Override
@@ -60,9 +60,8 @@ public class ReportImpl implements Report {
 
         for (ConcurrentMap.Entry<String, ReportItem> entry : this.report.entrySet()) {
             String key = entry.getKey();
-            ReportItem item = entry.getValue();
 
-            Integer totalSales = item.getTotalSales();
+            Integer totalSales = this.getSales(key);
 
             ConcurrentMap<Integer, BigDecimal> salesInfo = new ConcurrentHashMap<>();
             salesInfo.put(totalSales, getBookPrice(key).multiply(BigDecimal.valueOf(totalSales)));
@@ -73,12 +72,12 @@ public class ReportImpl implements Report {
     }
 
     @Override
-    public void setTotalSales(String bookType, Integer totalSales, BigDecimal price) {
+    public void setSales(String bookType, Integer totalSales, BigDecimal price) {
         this.report.put(bookType, new ReportItem(totalSales, price));
     }
 
     @Override
-    public Integer getTotalSales(String bookType) {
+    public Integer getSales(String bookType) {
         Supplier<Stream<ConcurrentMap<String, ReportItem>>> streamSupplier = () -> Stream.of(this.report);
 
         return streamSupplier

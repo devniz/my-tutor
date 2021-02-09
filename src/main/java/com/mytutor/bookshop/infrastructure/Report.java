@@ -5,13 +5,13 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 
 public interface Report {
-    void updateTotalSales(String bookType);
+    void updateTotalSales(String bookType, Integer quantity);
 
-    void setTotalSales(String bookType, Integer totalSales, BigDecimal price);
+    void setSales(String bookType, Integer totalSales, BigDecimal price);
 
     ConcurrentMap<String, Map<Integer, BigDecimal>> getReport();
 
-    Integer getTotalSales(String bookType);
+    Integer getSales(String bookType);
 
     BigDecimal getBookPrice(String bookType);
 

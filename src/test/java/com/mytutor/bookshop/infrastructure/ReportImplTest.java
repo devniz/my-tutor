@@ -25,12 +25,11 @@ class ReportImplTest {
     public void itShouldUpdateTotalSaleForSpecificBookType() {
         ReportImpl report = new ReportImpl();
 
-        report.updateTotalSales("A");
-        report.updateTotalSales("A");
-        report.updateTotalSales("D");
+        report.updateTotalSales("A", 2);
+        report.updateTotalSales("D", 1);
 
-        assertEquals(2, report.getTotalSales("A"));
-        assertEquals(1, report.getTotalSales("D"));
+        assertEquals(2, report.getSales("A"));
+        assertEquals(1, report.getSales("D"));
     }
 
     @Test
@@ -38,13 +37,8 @@ class ReportImplTest {
     public void itShouldCalculateProfitPerBookPriceCorrectly() {
         ReportImpl report = new ReportImpl();
 
-        report.updateTotalSales("A");
-        report.updateTotalSales("A");
-        report.updateTotalSales("A");
-        report.updateTotalSales("B");
-        report.updateTotalSales("B");
-        report.updateTotalSales("B");
-        report.updateTotalSales("B");
+        report.updateTotalSales("A", 3);
+        report.updateTotalSales("B", 4);
 
         var profitA = report.calculateTotalProfit("A");
         var profitB = report.calculateTotalProfit("B");
@@ -64,7 +58,7 @@ class ReportImplTest {
         Callable<Void> purchase = () -> {
             latch.countDown();
             latch.await();
-            r.updateTotalSales("E");
+            r.updateTotalSales("E", 1);
             return null;
         };
 
@@ -75,7 +69,7 @@ class ReportImplTest {
         t2.get();
         executor.shutdown();
 
-        assertEquals(2, r.getTotalSales("E"));
+        assertEquals(2, r.getSales("E"));
         assertEquals(new BigDecimal("54.00"), r.calculateTotalProfit("E"));
         assertEquals(new BigDecimal("554.00"), new BigDecimal("500.00").add(r.calculateTotalProfit("E")));
     }
@@ -85,14 +79,9 @@ class ReportImplTest {
     void itShouldGenerateValidReportBasedOnSales() {
         ReportImpl report = new ReportImpl();
 
-        report.updateTotalSales("A");
-        report.updateTotalSales("A"); // 2 sales
-        report.updateTotalSales("B"); // 1 sale
-        report.updateTotalSales("C"); // 5 sales
-        report.updateTotalSales("C");
-        report.updateTotalSales("C");
-        report.updateTotalSales("C");
-        report.updateTotalSales("C");
+        report.updateTotalSales("A", 2);
+        report.updateTotalSales("B", 1);
+        report.updateTotalSales("C", 5);
 
         var r = report.getReport();
         assertEquals(generateReport(), r);

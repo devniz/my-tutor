@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -60,14 +61,7 @@ public class InMemoryStorageImpl implements InMemoryStorage {
                 .findFirst();
 
         if (bookToOrderQuantity.isPresent() && bookToOrderQuantity.get() >= quantity) {
-            var orderedBookPrice = streamSupplier
-                    .get()
-                    .map(t -> t.get(bookType))
-                    .findFirst()
-                    .get()
-                    .getPrice();
-
-            var orderedBookNewQuantity = streamSupplier
+            var bookToOrderNewQuantity = streamSupplier
                     .get()
                     .map(t -> t.get(bookType))
                     .peek(q -> q.setQuantity(q.getQuantity() - quantity))
@@ -78,11 +72,11 @@ public class InMemoryStorageImpl implements InMemoryStorage {
             this.cashIn(quantity, bookToOrderPrice.get());
 
             this.store.put(bookType, new Book(
-                    new BigDecimal(String.valueOf(orderedBookPrice)),
-                    orderedBookNewQuantity
+                    new BigDecimal(String.valueOf(bookToOrderPrice.get())),
+                    bookToOrderNewQuantity
             ));
 
-            this.report.updateTotalSales(bookType);
+            this.report.updateTotalSales(bookType, quantity);
             this.report.calculateTotalProfit(bookType);
 
         } else {
@@ -133,6 +127,11 @@ public class InMemoryStorageImpl implements InMemoryStorage {
         var pricePerBook = restockPrice.multiply(_SUPPLIER_RATE_).setScale(2, RoundingMode.CEILING);
         var totalOrder = pricePerBook.multiply(new BigDecimal("10.00").setScale(2, RoundingMode.CEILING));
         this.setBudget(currentBudget.subtract(totalOrder).setScale(2, RoundingMode.CEILING));
+    }
+
+    @Override
+    public ConcurrentMap<String, Map<Integer, BigDecimal>> generateReport() {
+        return this.report.getReport();
     }
 
     @Override
