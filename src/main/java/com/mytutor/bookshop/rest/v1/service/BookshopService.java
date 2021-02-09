@@ -34,6 +34,8 @@ public class BookshopService {
                 log.error(ex.getMessage());
                 return "Sorry, we are out of stock.";
             }
+        } else {
+            return "we don't have this book type in the store: " + bookType;
         }
         return "Thank you for your purchase!";
     }
